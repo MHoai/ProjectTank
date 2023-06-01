@@ -18,7 +18,11 @@ namespace Complete
         private float m_CurrentHealth;                      // How much health the tank currently has.
         private bool m_Dead;                                // Has the tank been reduced beyond zero health yet?
 
-
+        public void BuffHP(float num)
+        {
+            m_CurrentHealth = m_CurrentHealth * num;
+            m_StartingHealth = m_StartingHealth * num;
+        }
         private void Awake ()
         {
             // Instantiate the explosion prefab and get a reference to the particle system on it.

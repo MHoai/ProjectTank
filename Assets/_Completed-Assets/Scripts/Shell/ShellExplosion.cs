@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Complete
 {
@@ -7,7 +7,7 @@ namespace Complete
         public LayerMask m_TankMask;                        // Used to filter what the explosion affects, this should be set to "Players".
         public ParticleSystem m_ExplosionParticles;         // Reference to the particles that will play on explosion.
         public AudioSource m_ExplosionAudio;                // Reference to the audio that will play on explosion.
-        public float m_MaxDamage = 100f;                    // The amount of damage done if the explosion is centred on a tank.
+        public float m_MaxDamage = 50f;                    // The amount of damage done if the explosion is centred on a tank.
         public float m_ExplosionForce = 1000f;              // The amount of force added to a tank at the centre of the explosion.
         public float m_MaxLifeTime = 2f;                    // The time in seconds before the shell is removed.
         public float m_ExplosionRadius = 0f;                // The maximum distance away from the explosion tanks can be and are still affected.
@@ -19,7 +19,10 @@ namespace Complete
             Destroy (gameObject, m_MaxLifeTime);
         }
 
-
+        public void IncreaseDamage(float num)
+        {
+            m_MaxDamage = m_MaxDamage * num;
+        }
         private void OnTriggerEnter (Collider other)
         {
 			// Collect all the colliders in a sphere from the shell's current position to a radius of the explosion radius.
@@ -44,10 +47,8 @@ namespace Complete
                 // If there is no TankHealth script attached to the gameobject, go on to the next collider.
                 if (!targetHealth)
                     continue;
-
                 // Calculate the amount of damage the target should take based on it's distance from the shell.
                 float damage = CalculateDamage (targetRigidbody.position);
-
                 // Deal this damage to the tank.
                 targetHealth.TakeDamage (damage);
             }
