@@ -23,6 +23,11 @@ namespace Complete
         private bool m_Fired;                       // Whether or not the shell has been launched with this button press.
 
 
+        public void setLaunchForce(float num)
+        {
+            m_MaxLaunchForce = m_MaxLaunchForce * num;
+            m_MinLaunchForce = m_MinLaunchForce * num;
+        }
         private void OnEnable()
         {
             // When the tank is turned on, reset the launch force and the UI

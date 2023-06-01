@@ -23,10 +23,38 @@ namespace Complete
         private void Awake ()
         {
             m_Rigidbody = GetComponent<Rigidbody> ();
+          
+            Transform LoveTransform = transform.Find("Love_aura"); // Tìm Prefab con "Love_aura" trong Prefab "tank"
+            //if (electroTransform != null)
+            //{
+            GameObject lovePrefab = LoveTransform.gameObject;
+
+            ParticleSystem particle_love = lovePrefab.GetComponent<ParticleSystem>();
+            if (particle_love != null)
+            {
+                particle_love.Stop();
+            }
+
+            
+            Transform electroTransform = transform.Find("Electro"); // Tìm Prefab con "Electro" trong Prefab "tank"
+            //if (electroTransform != null)
+            //{
+            GameObject electroPrefab = electroTransform.gameObject;
+
+            ParticleSystem particle_elec = electroPrefab.GetComponent<ParticleSystem>();
+            if (particle_elec != null)
+            {
+                particle_elec.Stop();
+            }
+            //}
         }
 
 
-        private void OnEnable ()
+        public void setSpeed(float num)
+        {
+            m_Speed = m_Speed * num;
+        }
+        private void OnEnable()
         {
             // When the tank is turned on, make sure it's not kinematic.
             m_Rigidbody.isKinematic = false;
@@ -45,8 +73,7 @@ namespace Complete
             }
         }
 
-
-        private void OnDisable ()
+            private void OnDisable ()
         {
             // When the tank is turned off, set it to kinematic so it stops moving.
             m_Rigidbody.isKinematic = true;
@@ -67,6 +94,30 @@ namespace Complete
 
             // Store the original pitch of the audio source.
             m_OriginalPitch = m_MovementAudio.pitch;
+            Transform electroTransform = transform.Find("Electro"); // Tìm Prefab con "Electro" trong Prefab "tank"
+
+            //if (electroTransform != null)
+            //{
+            GameObject electroPrefab = electroTransform.gameObject;
+
+            ParticleSystem particle_elec = electroPrefab.GetComponent<ParticleSystem>();
+            if (particle_elec != null)
+            {
+                particle_elec.Stop();
+            }
+            //}
+            Transform LoveTransform = transform.Find("Love_aura"); // Tìm Prefab con "Love_aura" trong Prefab "tank"
+
+            //if (electroTransform != null)
+            //{
+            GameObject lovePrefab = LoveTransform.gameObject;
+
+            ParticleSystem particle_love = lovePrefab.GetComponent<ParticleSystem>();
+            if (particle_love != null)
+            {
+                particle_love.Stop();
+            }
+            //}
         }
 
 
