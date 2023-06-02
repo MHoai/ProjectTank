@@ -50,7 +50,6 @@ namespace Complete
             //}
         }
 
-
         public void setSpeed(float num)
         {
             m_Speed = m_Speed * num;

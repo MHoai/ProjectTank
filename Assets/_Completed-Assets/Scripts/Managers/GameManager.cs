@@ -42,6 +42,8 @@ namespace Complete
         public GameObject m_TankPrefabNet;
         public TankManager[] tanksNetwork;
 
+        public GameObject LevelArt;
+
         private void Start()
         {
             // Create the delays so they only have to be made once.
@@ -445,7 +447,7 @@ namespace Complete
             HostBtn.gameObject.SetActive(false);
             ClientBtn.gameObject.SetActive(false);
             NetworkManager.Singleton.StartHost();
-            //StartCoroutine(NetworkGameLoop());
+            StartCoroutine(NetworkGameLoop());
         }
 
         public void ClientBtnPressed()
@@ -453,68 +455,82 @@ namespace Complete
             HostBtn.gameObject.SetActive(false);
             ClientBtn.gameObject.SetActive(false);
             NetworkManager.Singleton.StartClient();
-            //StartCoroutine(NetworkGameLoop());
+            StartCoroutine(NetworkGameLoop());
+  
         }
 
         private IEnumerator NetworkGameLoop()
         {
-            //while (m_WaitingMenu)
-            //{
-            //    yield return null;
-            //}
-
-            //if (set_up_AI_once == true && !m_WaitingMenu)
-            //{
-            //    set_up_AI_once = false;
-            //    SpawnAllTanks();
-            for (int i = 0; i < tanksNetwork.Length; i++)
-            {
-                // ... create them, set their player number and references needed for control.
-                tanksNetwork[i].m_Instance =
-                    Instantiate(m_TankPrefabNet, tanksNetwork[i].m_SpawnPoint.position, tanksNetwork[i].m_SpawnPoint.rotation) as GameObject;
-                tanksNetwork[i].m_PlayerNumber = i + 1;
-                tanksNetwork[i].Setup();
-            }
-            //SetCameraTargets();
-
             // Create a collection of transforms the same size as the number of tanks.
-            Transform[] targets = new Transform[tanksNetwork.Length];
+            Transform[] targets = new Transform[LevelArt.transform.childCount];
 
             // For each of these transforms...
-            for (int i = 0; i < tanksNetwork.Length; i++)
+            for (int i = 0; i < LevelArt.transform.childCount; i++)
             {
                 // ... set it to the appropriate tank transform.
-                targets[i] = tanksNetwork[i].m_Instance.transform;
+                targets[i] = LevelArt.transform.GetChild(i);
             }
 
             // These are the targets the camera should follow.
             m_CameraControl.m_Targets = targets;
+            yield return null;
+            ////while (m_WaitingMenu)
+            ////{
+            ////    yield return null;
+            ////}
 
-            //}
-            //if (!m_WaitingMenu)
+            ////if (set_up_AI_once == true && !m_WaitingMenu)
+            ////{
+            ////    set_up_AI_once = false;
+            ////    SpawnAllTanks();
+            //for (int i = 0; i < tanksNetwork.Length; i++)
             //{
-                // Start off by running the 'RoundStarting' coroutine but don't return until it's finished.
-                yield return StartCoroutine(RoundStartingNet());
-
-                // Once the 'RoundStarting' coroutine is finished, run the 'RoundPlaying' coroutine but don't return until it's finished.
-                yield return StartCoroutine(RoundPlayingNet());
-
-                // Once execution has returned here, run the 'RoundEnding' coroutine, again don't return until it's finished.
-                yield return StartCoroutine(RoundEndingNet());
-
-                // This code is not run until 'RoundEnding' has finished.  At which point, check if a game winner has been found.
-                //if (m_GameWinner != null) du thang hay thua cung chi co 1 round
-                //{
-                // If there is a game winner, restart the level.
-                SceneManager.LoadScene(0);
-                //}
-                //else
-                //{
-                // If there isn't a winner yet, restart this coroutine so the loop continues.
-                // Note that this coroutine doesn't yield.  This means that the current version of the GameLoop will end.
-                //   StartCoroutine(GameLoop());
-                // }
+            //    // ... create them, set their player number and references needed for control.
+            //    tanksNetwork[i].m_Instance =
+            //        Instantiate(m_TankPrefabNet, tanksNetwork[i].m_SpawnPoint.position, tanksNetwork[i].m_SpawnPoint.rotation) as GameObject;
+            //    tanksNetwork[i].m_PlayerNumber = i + 1;
+            //    tanksNetwork[i].Setup();
             //}
+            ////SetCameraTargets();
+
+            //// Create a collection of transforms the same size as the number of tanks.
+            //Transform[] targets = new Transform[tanksNetwork.Length];
+
+            //// For each of these transforms...
+            //for (int i = 0; i < tanksNetwork.Length; i++)
+            //{
+            //    // ... set it to the appropriate tank transform.
+            //    targets[i] = tanksNetwork[i].m_Instance.transform;
+            //}
+
+            //// These are the targets the camera should follow.
+            //m_CameraControl.m_Targets = targets;
+
+            ////}
+            ////if (!m_WaitingMenu)
+            ////{
+            //// Start off by running the 'RoundStarting' coroutine but don't return until it's finished.
+            //yield return StartCoroutine(RoundStartingNet());
+
+            //// Once the 'RoundStarting' coroutine is finished, run the 'RoundPlaying' coroutine but don't return until it's finished.
+            //yield return StartCoroutine(RoundPlayingNet());
+
+            //// Once execution has returned here, run the 'RoundEnding' coroutine, again don't return until it's finished.
+            //yield return StartCoroutine(RoundEndingNet());
+
+            //// This code is not run until 'RoundEnding' has finished.  At which point, check if a game winner has been found.
+            ////if (m_GameWinner != null) du thang hay thua cung chi co 1 round
+            ////{
+            //// If there is a game winner, restart the level.
+            //SceneManager.LoadScene(0);
+            ////}
+            ////else
+            ////{
+            //// If there isn't a winner yet, restart this coroutine so the loop continues.
+            //// Note that this coroutine doesn't yield.  This means that the current version of the GameLoop will end.
+            ////   StartCoroutine(GameLoop());
+            //// }
+            ////}
         }
 
         private IEnumerator RoundStartingNet()
