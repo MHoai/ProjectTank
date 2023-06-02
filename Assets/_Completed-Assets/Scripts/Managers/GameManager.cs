@@ -16,7 +16,7 @@ namespace Complete
         public GameObject m_TankPrefab;
         public GameObject m_BoxPrefab;
         public GameObject m_TowerPrefab;
-        public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
+        public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks
 
         public GameObject m_MobNormal0;
         public GameObject m_MobNormal1;
@@ -39,6 +39,8 @@ namespace Complete
         private bool m_WaitingMenu = true;
         private bool set_up_AI_once = true;
 
+        public GameObject m_TankPrefabNet;
+        public TankManager[] tanksNetwork;
 
         private void Start()
         {
@@ -443,7 +445,7 @@ namespace Complete
             HostBtn.gameObject.SetActive(false);
             ClientBtn.gameObject.SetActive(false);
             NetworkManager.Singleton.StartHost();
-            StartCoroutine(NetworkGameLoop());
+            //StartCoroutine(NetworkGameLoop());
         }
 
         public void ClientBtnPressed()
@@ -451,7 +453,7 @@ namespace Complete
             HostBtn.gameObject.SetActive(false);
             ClientBtn.gameObject.SetActive(false);
             NetworkManager.Singleton.StartClient();
-            StartCoroutine(NetworkGameLoop());
+            //StartCoroutine(NetworkGameLoop());
         }
 
         private IEnumerator NetworkGameLoop()
@@ -465,24 +467,24 @@ namespace Complete
             //{
             //    set_up_AI_once = false;
             //    SpawnAllTanks();
-            for (int i = 0; i < m_Tanks.Length; i++)
+            for (int i = 0; i < tanksNetwork.Length; i++)
             {
                 // ... create them, set their player number and references needed for control.
-                m_Tanks[i].m_Instance =
-                    Instantiate(m_TankPrefab, m_Tanks[i].m_SpawnPoint.position, m_Tanks[i].m_SpawnPoint.rotation) as GameObject;
-                m_Tanks[i].m_PlayerNumber = i + 1;
-                m_Tanks[i].Setup();
+                tanksNetwork[i].m_Instance =
+                    Instantiate(m_TankPrefabNet, tanksNetwork[i].m_SpawnPoint.position, tanksNetwork[i].m_SpawnPoint.rotation) as GameObject;
+                tanksNetwork[i].m_PlayerNumber = i + 1;
+                tanksNetwork[i].Setup();
             }
             //SetCameraTargets();
 
             // Create a collection of transforms the same size as the number of tanks.
-            Transform[] targets = new Transform[m_Tanks.Length];
+            Transform[] targets = new Transform[tanksNetwork.Length];
 
             // For each of these transforms...
-            for (int i = 0; i < m_Tanks.Length; i++)
+            for (int i = 0; i < tanksNetwork.Length; i++)
             {
                 // ... set it to the appropriate tank transform.
-                targets[i] = m_Tanks[i].m_Instance.transform;
+                targets[i] = tanksNetwork[i].m_Instance.transform;
             }
 
             // These are the targets the camera should follow.
@@ -518,13 +520,13 @@ namespace Complete
         private IEnumerator RoundStartingNet()
         {
             // As soon as the round starts reset the tanks and make sure they can't move.
-            for (int i = 0; i < m_Tanks.Length; i++)
+            for (int i = 0; i < tanksNetwork.Length; i++)
             {
-                m_Tanks[i].Reset();
+                tanksNetwork[i].Reset();
             }
-            for (int i = 0; i < m_Tanks.Length; i++)
+            for (int i = 0; i < tanksNetwork.Length; i++)
             {
-                m_Tanks[i].DisableControl();
+                tanksNetwork[i].DisableControl();
             }
 
             // Snap the camera's zoom and position to something appropriate for the reset tanks.
@@ -546,16 +548,16 @@ namespace Complete
         private IEnumerator RoundPlayingNet()
         {
             // As soon as the round begins playing let the players control the tanks.
-            for (int i = 0; i < m_Tanks.Length; i++)
+            for (int i = 0; i < tanksNetwork.Length; i++)
             {
-                m_Tanks[i].EnableControl();
+                tanksNetwork[i].EnableControl();
             }
 
             // Clear the text from the screen.
             m_MessageText.text = string.Empty;
 
             // While there is not one tank left...
-            while (!NoneTankLeft())
+            while (!NoneTankLeftNet())
             {
                 //for (int i = 0; i < m_Mobs.Length; i++)
                 //{
@@ -572,13 +574,31 @@ namespace Complete
             //}
         }
 
+        // This is used to check if there is one or fewer tanks remaining and thus the round should end.
+        private bool NoneTankLeftNet()
+        {
+            // Start the count of tanks left at zero.
+            int numTanksLeft = 0;
+
+            // Go through all the tanks...
+            for (int i = 0; i < tanksNetwork.Length; i++)
+            {
+                // ... and if they are active, increment the counter.
+                if (tanksNetwork[i].m_Instance.activeSelf)
+                    numTanksLeft++;
+            }
+
+            // If there are one or fewer tanks remaining return true, otherwise return false.
+            return numTanksLeft <= 0;
+        }
+
 
         private IEnumerator RoundEndingNet()
         {
             // Stop tanks from moving.
-            for (int i = 0; i < m_Tanks.Length; i++)
+            for (int i = 0; i < tanksNetwork.Length; i++)
             {
-                m_Tanks[i].DisableControl();
+                tanksNetwork[i].DisableControl();
             }
 
 
