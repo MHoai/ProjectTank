@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Unity.Netcode;
 
 namespace Complete
 {
@@ -49,10 +50,10 @@ namespace Complete
             ClientBtn.gameObject.SetActive(false);
 
             // Once the tanks have been created and the camera is using them as targets, start the game.
-            StartCoroutine(GameLoop());
+            //StartCoroutine(GameLoop());
         }
 
-
+        #region AI Mode
         private void SpawnAllTanks()
         {
             // For all the tanks...
@@ -104,7 +105,7 @@ namespace Complete
                     Instantiate(m_TowerPrefab, m_Towers[i].m_SpawnPoint.position, m_Towers[i].m_SpawnPoint.rotation) as GameObject;
                 m_Towers[i].m_PlayerNumber = i + 1;
                 m_Towers[i].Setup();
-                
+
             }
 
         }
@@ -134,30 +135,14 @@ namespace Complete
 
         public void AI_button_pressed()
         {
+
+            AI_button.gameObject.SetActive(false);
+            NetworkBtn.gameObject.SetActive(false);
+            m_StartWait = new WaitForSeconds(m_StartDelay);
+            m_EndWait = new WaitForSeconds(m_EndDelay);
+            StartCoroutine(GameLoop());
             m_WaitingMenu = false;
-            AI_button.gameObject.SetActive(false);
-            NetworkBtn.gameObject.SetActive(false);
             m_NumRoundsToWin = 1;
-        }
-
-        public void NetworkBtnPressed()
-        {
-            AI_button.gameObject.SetActive(false);
-            NetworkBtn.gameObject.SetActive(false);
-            HostBtn.gameObject.SetActive(true);
-            ClientBtn.gameObject.SetActive(true);
-        }
-
-        public void HostBtnPressed()
-        {
-            HostBtn.gameObject.SetActive(false);
-            ClientBtn.gameObject.SetActive(false);
-        }
-        
-        public void ClientBtnPressed()
-        {
-            HostBtn.gameObject.SetActive(false);
-            ClientBtn.gameObject.SetActive(false);
         }
 
         // This is called from start and will run each phase of the game one after another.
@@ -188,18 +173,17 @@ namespace Complete
                 // This code is not run until 'RoundEnding' has finished.  At which point, check if a game winner has been found.
                 //if (m_GameWinner != null) du thang hay thua cung chi co 1 round
                 //{
-                    // If there is a game winner, restart the level.
-                    SceneManager.LoadScene(0);
+                // If there is a game winner, restart the level.
+                SceneManager.LoadScene(0);
                 //}
                 //else
                 //{
-                    // If there isn't a winner yet, restart this coroutine so the loop continues.
-                    // Note that this coroutine doesn't yield.  This means that the current version of the GameLoop will end.
-                 //   StartCoroutine(GameLoop());
-               // }
+                // If there isn't a winner yet, restart this coroutine so the loop continues.
+                // Note that this coroutine doesn't yield.  This means that the current version of the GameLoop will end.
+                //   StartCoroutine(GameLoop());
+                // }
             }
         }
-
 
         private IEnumerator RoundStarting()
         {
@@ -442,5 +426,183 @@ namespace Complete
                 m_Towers[i].DisableControl();
             }
         }
+
+        #endregion
+
+        #region NetWork
+        public void NetworkBtnPressed()
+        {
+            AI_button.gameObject.SetActive(false);
+            NetworkBtn.gameObject.SetActive(false);
+            HostBtn.gameObject.SetActive(true);
+            ClientBtn.gameObject.SetActive(true);
+        }
+
+        public void HostBtnPressed()
+        {
+            HostBtn.gameObject.SetActive(false);
+            ClientBtn.gameObject.SetActive(false);
+            NetworkManager.Singleton.StartHost();
+            StartCoroutine(NetworkGameLoop());
+        }
+
+        public void ClientBtnPressed()
+        {
+            HostBtn.gameObject.SetActive(false);
+            ClientBtn.gameObject.SetActive(false);
+            NetworkManager.Singleton.StartClient();
+            StartCoroutine(NetworkGameLoop());
+        }
+
+        private IEnumerator NetworkGameLoop()
+        {
+            //while (m_WaitingMenu)
+            //{
+            //    yield return null;
+            //}
+
+            //if (set_up_AI_once == true && !m_WaitingMenu)
+            //{
+            //    set_up_AI_once = false;
+            //    SpawnAllTanks();
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                // ... create them, set their player number and references needed for control.
+                m_Tanks[i].m_Instance =
+                    Instantiate(m_TankPrefab, m_Tanks[i].m_SpawnPoint.position, m_Tanks[i].m_SpawnPoint.rotation) as GameObject;
+                m_Tanks[i].m_PlayerNumber = i + 1;
+                m_Tanks[i].Setup();
+            }
+            //SetCameraTargets();
+
+            // Create a collection of transforms the same size as the number of tanks.
+            Transform[] targets = new Transform[m_Tanks.Length];
+
+            // For each of these transforms...
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                // ... set it to the appropriate tank transform.
+                targets[i] = m_Tanks[i].m_Instance.transform;
+            }
+
+            // These are the targets the camera should follow.
+            m_CameraControl.m_Targets = targets;
+
+            //}
+            //if (!m_WaitingMenu)
+            //{
+                // Start off by running the 'RoundStarting' coroutine but don't return until it's finished.
+                yield return StartCoroutine(RoundStartingNet());
+
+                // Once the 'RoundStarting' coroutine is finished, run the 'RoundPlaying' coroutine but don't return until it's finished.
+                yield return StartCoroutine(RoundPlayingNet());
+
+                // Once execution has returned here, run the 'RoundEnding' coroutine, again don't return until it's finished.
+                yield return StartCoroutine(RoundEndingNet());
+
+                // This code is not run until 'RoundEnding' has finished.  At which point, check if a game winner has been found.
+                //if (m_GameWinner != null) du thang hay thua cung chi co 1 round
+                //{
+                // If there is a game winner, restart the level.
+                SceneManager.LoadScene(0);
+                //}
+                //else
+                //{
+                // If there isn't a winner yet, restart this coroutine so the loop continues.
+                // Note that this coroutine doesn't yield.  This means that the current version of the GameLoop will end.
+                //   StartCoroutine(GameLoop());
+                // }
+            //}
+        }
+
+        private IEnumerator RoundStartingNet()
+        {
+            // As soon as the round starts reset the tanks and make sure they can't move.
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                m_Tanks[i].Reset();
+            }
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                m_Tanks[i].DisableControl();
+            }
+
+            // Snap the camera's zoom and position to something appropriate for the reset tanks.
+            m_CameraControl.SetStartPositionAndSize();
+
+            // Increment the round number and display text showing the players what round it is.
+            m_RoundNumber++;
+            m_MessageText.text = "START";// "ROUND " + m_RoundNumber;
+
+            //for (int i = 0; i < m_Mobs.Length; i++)
+            //{
+            //    m_Mobs[i].m_StateManager.PlayerLocation = m_Tanks[0].m_Instance.transform;
+            //}
+
+            // Wait for the specified length of time until yielding control back to the game loop.
+            yield return m_StartWait;
+        }
+
+        private IEnumerator RoundPlayingNet()
+        {
+            // As soon as the round begins playing let the players control the tanks.
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                m_Tanks[i].EnableControl();
+            }
+
+            // Clear the text from the screen.
+            m_MessageText.text = string.Empty;
+
+            // While there is not one tank left...
+            while (!NoneTankLeft())
+            {
+                //for (int i = 0; i < m_Mobs.Length; i++)
+                //{
+                //    m_Mobs[i].m_StateManager.PlayerLocation = m_Tanks[0].m_Instance.transform;
+                //    m_Mobs[i].m_StateManager.oneTankLeft = false;
+                //}
+
+                // ... return on the next frame.
+                yield return null;
+            }
+            //for (int i = 0; i < m_Mobs.Length; i++)
+            //{
+            //    m_Mobs[i].m_StateManager.oneTankLeft = true;
+            //}
+        }
+
+
+        private IEnumerator RoundEndingNet()
+        {
+            // Stop tanks from moving.
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                m_Tanks[i].DisableControl();
+            }
+
+
+            //// Clear the winner from the previous round.
+            //m_RoundWinner = null;
+
+            //// See if there is a winner now the round is over.
+            //m_RoundWinner = GetRoundWinner();
+
+            //// If there is a winner, increment their score.
+            //if (m_RoundWinner != null)
+            //    m_RoundWinner.m_Wins++;
+
+            //// Now the winner's score has been incremented, see if someone has one the game.
+            //m_GameWinner = GetGameWinner();
+
+            //// Get a message based on the scores and whether or not there is a game winner and display it.
+            //string message = EndMessage();
+            m_MessageText.text = "GAME OVER!!!";
+
+            // Wait for the specified length of time until yielding control back to the game loop.
+            yield return m_EndWait;
+        }
+
     }
 }
+#endregion
