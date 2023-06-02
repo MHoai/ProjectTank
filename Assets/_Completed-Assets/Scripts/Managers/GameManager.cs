@@ -25,6 +25,9 @@ namespace Complete
         public TowerManager[] m_Towers;
 
         public Button AI_button;
+        public Button NetworkBtn;
+        public Button HostBtn;
+        public Button ClientBtn;
 
         private int m_RoundNumber;                  // Which round the game is currently on.
         private WaitForSeconds m_StartWait;         // Used to have a delay whilst the round starts.
@@ -41,6 +44,9 @@ namespace Complete
             // Create the delays so they only have to be made once.
             m_StartWait = new WaitForSeconds(m_StartDelay);
             m_EndWait = new WaitForSeconds(m_EndDelay);
+
+            HostBtn.gameObject.SetActive(false);
+            ClientBtn.gameObject.SetActive(false);
 
             // Once the tanks have been created and the camera is using them as targets, start the game.
             StartCoroutine(GameLoop());
@@ -130,9 +136,29 @@ namespace Complete
         {
             m_WaitingMenu = false;
             AI_button.gameObject.SetActive(false);
+            NetworkBtn.gameObject.SetActive(false);
             m_NumRoundsToWin = 1;
         }
 
+        public void NetworkBtnPressed()
+        {
+            AI_button.gameObject.SetActive(false);
+            NetworkBtn.gameObject.SetActive(false);
+            HostBtn.gameObject.SetActive(true);
+            ClientBtn.gameObject.SetActive(true);
+        }
+
+        public void HostBtnPressed()
+        {
+            HostBtn.gameObject.SetActive(false);
+            ClientBtn.gameObject.SetActive(false);
+        }
+        
+        public void ClientBtnPressed()
+        {
+            HostBtn.gameObject.SetActive(false);
+            ClientBtn.gameObject.SetActive(false);
+        }
 
         // This is called from start and will run each phase of the game one after another.
         private IEnumerator GameLoop()
