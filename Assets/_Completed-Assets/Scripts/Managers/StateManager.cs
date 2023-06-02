@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
+
 namespace Complete
 {
-public class StateManager : MonoBehaviour
+public class StateManager : NetworkBehaviour
 {
     public State currentState;
     public int m_TypeMob;
