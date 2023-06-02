@@ -447,7 +447,20 @@ namespace Complete
             HostBtn.gameObject.SetActive(false);
             ClientBtn.gameObject.SetActive(false);
             NetworkManager.Singleton.StartHost();
-            StartCoroutine(NetworkGameLoop());
+            //StartCoroutine(NetworkGameLoop());
+            m_MessageText.text = "";
+            // Create a collection of transforms the same size as the number of tanks.
+            Transform[] targets = new Transform[LevelArt.transform.childCount];
+
+            // For each of these transforms...
+            for (int i = 0; i < LevelArt.transform.childCount; i++)
+            {
+                // ... set it to the appropriate tank transform.
+                targets[i] = LevelArt.transform.GetChild(i);
+            }
+
+            // These are the targets the camera should follow.
+            m_CameraControl.m_Targets = targets;
         }
 
         public void ClientBtnPressed()
@@ -455,14 +468,27 @@ namespace Complete
             HostBtn.gameObject.SetActive(false);
             ClientBtn.gameObject.SetActive(false);
             NetworkManager.Singleton.StartClient();
-            StartCoroutine(NetworkGameLoop());
-  
+            //StartCoroutine(NetworkGameLoop());
+            m_MessageText.text = "";
+            // Create a collection of transforms the same size as the number of tanks.
+            Transform[] targets = new Transform[LevelArt.transform.childCount];
+
+            // For each of these transforms...
+            for (int i = 0; i < LevelArt.transform.childCount; i++)
+            {
+                // ... set it to the appropriate tank transform.
+                targets[i] = LevelArt.transform.GetChild(i);
+            }
+
+            // These are the targets the camera should follow.
+            m_CameraControl.m_Targets = targets;
         }
 
         private IEnumerator NetworkGameLoop()
         {
-            // Create a collection of transforms the same size as the number of tanks.
-            Transform[] targets = new Transform[LevelArt.transform.childCount];
+            m_MessageText.text = "";
+               // Create a collection of transforms the same size as the number of tanks.
+               Transform[] targets = new Transform[LevelArt.transform.childCount];
 
             // For each of these transforms...
             for (int i = 0; i < LevelArt.transform.childCount; i++)
