@@ -124,7 +124,6 @@ namespace Complete
 
         private void Update ()
         {
-            if (!IsOwner) return;
             // Store the value of both input axes.
             m_MovementInputValue = Input.GetAxis (m_MovementAxisName);
             m_TurnInputValue = Input.GetAxis (m_TurnAxisName);
