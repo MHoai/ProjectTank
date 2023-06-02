@@ -91,6 +91,7 @@ namespace Complete
 
             // Turn the tank off.
             gameObject.SetActive (false);
+            gameObject.GetComponent<NetworkObject>().Despawn();
         }
 
         public void SetCurrentHealth(float health) {
