@@ -49,7 +49,6 @@ namespace Complete
 
         private void Update ()
         {
-            if (!IsOwner) return;
             // The slider should have a default value of the minimum launch force.
             m_AimSlider.value = m_MinLaunchForce;
 
@@ -87,7 +86,7 @@ namespace Complete
             }
         }
 
-
+        
         private void Fire ()
         {
             // Set the fired flag so only Fire is only called once.
@@ -96,7 +95,7 @@ namespace Complete
             // Create an instance of the shell and store a reference to it's rigidbody.
             Rigidbody shellInstance =
                 Instantiate (m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
-
+            //shellInstance.GetComponent<NetworkObject>().Spawn();
             // Set the shell's velocity to the launch force in the fire position's forward direction.
             shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward; 
 
